@@ -1,22 +1,32 @@
-// src/components/Map.js
-import React, { useEffect } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+// map.js
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import { useState } from 'react';
+import MapWithImageMarker from './MapWithImageMarker'; // ✅
 
-const Map = () => {
-  useEffect(() => {
-    const map = L.map('map').setView([51.505, -0.09], 2);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+function ChangeMapView({ coords }) {
+  const map = useMap();
+  map.setView(coords, map.getZoom());
+  return null;
+}
 
-    L.marker([51.5, -0.09]).addTo(map)
-      .bindPopup('Social Cause Event')
-      .openPopup();
-  }, []);
+export default function MyMapComponent() {
+  const [coords, setCoords] = useState([51.505, -0.09]);
 
-  return <div id="map" style={{ height: '500px', width: '100%' }}></div>;
-};
+  const handleClick = () => {
+    setCoords([40.7128, -74.006]); // New York coords
+  };
 
-export default Map;
+  return (
+    <>
+      <button onClick={handleClick}>Go to New York</button>
+      <MapContainer center={coords} zoom={13} style={{ height: '100vh', width: '100vw' }}>
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <ChangeMapView coords={coords} />
+        <Marker position={coords} />
+      </MapContainer>
+    </>
+  );
+}

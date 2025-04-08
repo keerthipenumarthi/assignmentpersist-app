@@ -23,3 +23,14 @@ app.get('/api/content', (req, res) => {
 });
 
 app.listen(5000, () => console.log('Server running on port 5000'));
+// server.js
+const io = require("socket.io")(4000, {
+  cors: { origin: "*" }
+});
+
+io.on("connection", socket => {
+  socket.on("send-message", msg => {
+    io.emit("receive-message", msg);
+  });
+});
+
