@@ -1,135 +1,133 @@
-import React, { useState, useEffect } from 'react';
+/// IntroPage.js
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const features = [
-  {
-    title: 'Interactive Maps',
-    description: 'Navigate cities, landscapes, and borders with precision and ease.',
-  },
-  {
-    title: 'Global Chat',
-    description: 'Engage in real-time discussions with users worldwide.',
-  },
-  {
-    title: 'Geo Quizzes',
-    description: 'Test your knowledge with curated geographic and cultural quizzes.',
-  },
-  {
-    title: 'Cross-Platform Access',
-    description: 'Seamlessly access Explorer on mobile, tablet, or desktop.',
-  },
-  {
-    title: 'Optimized Performance',
-    description: 'Built for speed, responsiveness, and stability.',
-  },
-  {
-    title: 'Free & Open',
-    description: 'No subscriptions, no limitations — just exploration.',
-  },
-];
-
-const reasons = [
-  'Live, interactive experience',
-  'No account or login required',
-  'Built for learners, educators, and explorers',
-  'Compatible with all major devices and browsers',
-];
+import './IntroPage.css';
 
 const IntroPage = () => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+  const [errors, setErrors] = useState({
+    email: '',
+    password: '',
+  });
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
   const navigate = useNavigate();
-  const [hasVisited, setHasVisited] = useState(false);
 
-  useEffect(() => {
-    const visited = localStorage.getItem('hasVisited');
-    if (visited) setHasVisited(true);
-  }, []);
+  // Simulate users database
+  const usersDatabase = [
+    { email: 'user@example.com', password: 'password123' },
+    { email: 'test@example.com', password: 'test1234' },
+    { email: 'keerthi@gmail.com', password: 'password123' }, // Test user
+    { email: 'fairy@gmail.com', password: 'fairy@123' },
+  ];
 
-  const handleEnterApp = () => {
-    localStorage.setItem('hasVisited', 'true');
-    navigate('/home');
+  const validate = () => {
+    let isValid = true;
+    let newErrors = {};
+
+    // Email validation
+    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+      isValid = false;
+    }
+
+    // Password validation
+    if (!formData.password || formData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleChange = (e) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validate()) {
+      const user = usersDatabase.find(
+        (u) => u.email === formData.email && u.password === formData.password
+      );
+
+      if (user) {
+        localStorage.setItem('userEmail', formData.email);
+        navigate('/home'); // Navigate to home on successful login
+      } else {
+        setErrorMessage('Incorrect email or password. Please try again.');
+      }
+    }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-indigo-900 to-blue-900 text-white font-sans overflow-x-hidden p-6">
-      
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto text-center pt-16 pb-10">
-        <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4">
-          Explorer: Navigate, Connect, Learn.
-        </h1>
-        {hasVisited && (
-          <p className="text-green-400 text-md font-medium mb-2">
-            Welcome back.
-          </p>
-        )}
-        <p className="text-gray-300 text-lg max-w-2xl mx-auto mb-8">
-          Discover detailed maps, participate in global conversations, and enhance your world knowledge — all in one streamlined platform.
-        </p>
-        <button
-          onClick={handleEnterApp}
-          className="bg-white text-indigo-800 font-semibold py-3 px-8 rounded-full transition hover:scale-105 shadow-md"
-        >
-          Get Started
-        </button>
-      </div>
+    <div className="intro-container">
+      <div className="intro-content">
+        <h1>Welcome Back</h1>
+        <p>Please log in to continue</p>
 
-      {/* Feature Grid */}
-      <section className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
-        {features.map((feature, index) => (
-          <div
-            key={index}
-            className="bg-white/10 backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition text-white"
-          >
-            <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-            <p className="text-gray-300 text-sm">{feature.description}</p>
+        {errorMessage && <div className="error-message">{errorMessage}</div>}
+
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-group">
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`input ${errors.email ? 'error' : ''}`}
+              required
+            />
+            {errors.email && <small className="error-text">{errors.email}</small>}
           </div>
-        ))}
-      </section>
 
-      {/* Reasons Section */}
-      <section className="max-w-5xl mx-auto mt-20 bg-white/5 border border-indigo-700 rounded-xl p-8">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center text-blue-100">Why Explorer?</h2>
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-white text-md">
-          {reasons.map((reason, idx) => (
-            <li key={idx} className="flex items-start gap-2">
-              <span className="text-green-400">✔</span>
-              <span>{reason}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+          <div className="input-group">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              className={`input ${errors.password ? 'error' : ''}`}
+              required
+            />
+            {errors.password && <small className="error-text">{errors.password}</small>}
+          </div>
 
-      {/* Preview Highlights */}
-      <section className="max-w-6xl mx-auto mt-20 flex flex-col sm:flex-row justify-between gap-8 text-center">
-        <div className="flex-1 bg-indigo-800/60 p-6 rounded-xl">
-          <h4 className="text-xl font-bold text-cyan-200 mb-2">Map Explorer</h4>
-          <p className="text-gray-300 text-sm">Search, explore, and visualize geographic data in real time.</p>
-        </div>
-        <div className="flex-1 bg-purple-800/60 p-6 rounded-xl">
-          <h4 className="text-xl font-bold text-green-200 mb-2">Live Chat</h4>
-          <p className="text-gray-300 text-sm">Converse with a global audience and share insights.</p>
-        </div>
-        <div className="flex-1 bg-blue-800/60 p-6 rounded-xl">
-          <h4 className="text-xl font-bold text-pink-200 mb-2">Geo Quiz</h4>
-          <p className="text-gray-300 text-sm">Assess and improve your geography skills with engaging challenges.</p>
-        </div>
-      </section>
+          <div className="show-password-container">
+            <label>
+              <input
+                type="checkbox"
+                checked={showPassword}
+                onChange={togglePasswordVisibility}
+                className="show-password-checkbox"
+              />
+              Show Password
+            </label>
+          </div>
 
-      {/* Footer */}
-      <footer className="text-center text-sm text-gray-400 mt-20 pb-6">
-        <p>© {new Date().getFullYear()} Explorer — Created by Keerthi</p>
-        <div className="flex justify-center gap-4 mt-4">
-          <a href="https://github.com/yourgithub" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-            GitHub
-          </a>
-          <a href="https://twitter.com/yourtwitter" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-            Twitter
-          </a>
-          <a href="https://linkedin.com/in/yourlinkedin" target="_blank" rel="noopener noreferrer" className="hover:text-white">
-            LinkedIn
+          <button type="submit" className="login-button">Login</button>
+        </form>
+
+        <div className="links">
+          <a href="#" className="forgot-password">Forgot Password?</a>
+          <a href="#" className="CreateAccount" onClick={() => navigate('/createaccount')}>
+            Create an Account
           </a>
         </div>
-      </footer>
+      </div>
     </div>
   );
 };
