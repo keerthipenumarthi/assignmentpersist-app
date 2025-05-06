@@ -1,0 +1,23 @@
+{
+  "files": {
+    "main.css": "/assignmentpersist-app/static/css/main.2afc8bb8.css",
+    "main.js": "/assignmentpersist-app/static/js/main.55e7a283.js",
+    "static/js/845.fa3f2e9f.chunk.js": "/assignmentpersist-app/static/js/845.fa3f2e9f.chunk.js",
+    "static/media/fa-solid-900.ttf": "/assignmentpersist-app/static/media/fa-solid-900.2582b0e4bcf85eceead0.ttf",
+    "static/media/fa-brands-400.ttf": "/assignmentpersist-app/static/media/fa-brands-400.1815e00441357e01619e.ttf",
+    "static/media/fa-solid-900.woff2": "/assignmentpersist-app/static/media/fa-solid-900.2463b90d9a316e4e5294.woff2",
+    "static/media/fa-brands-400.woff2": "/assignmentpersist-app/static/media/fa-brands-400.c210719e60948b211a12.woff2",
+    "static/media/fa-regular-400.ttf": "/assignmentpersist-app/static/media/fa-regular-400.914997e1bdfc990d0897.ttf",
+    "static/media/fa-regular-400.woff2": "/assignmentpersist-app/static/media/fa-regular-400.89999bdf5d835c012025.woff2",
+    "static/media/fa-v4compatibility.ttf": "/assignmentpersist-app/static/media/fa-v4compatibility.da94ef451f4969af06e6.ttf",
+    "static/media/fa-v4compatibility.woff2": "/assignmentpersist-app/static/media/fa-v4compatibility.ea8f94e1d22e0d35ccd4.woff2",
+    "index.html": "/assignmentpersist-app/index.html",
+    "main.2afc8bb8.css.map": "/assignmentpersist-app/static/css/main.2afc8bb8.css.map",
+    "main.55e7a283.js.map": "/assignmentpersist-app/static/js/main.55e7a283.js.map",
+    "845.fa3f2e9f.chunk.js.map": "/assignmentpersist-app/static/js/845.fa3f2e9f.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.2afc8bb8.css",
+    "static/js/main.55e7a283.js"
+  ]
+}
