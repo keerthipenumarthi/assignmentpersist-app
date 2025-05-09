@@ -1,7 +1,8 @@
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet';
 import { useState } from 'react';
 import L from 'leaflet';
-import axios from 'axios';
+
+import 'leaflet/dist/leaflet.css';
 
 // Custom icon for the marker
 const customIcon = new L.Icon({
@@ -10,21 +11,39 @@ const customIcon = new L.Icon({
   iconAnchor: [16, 32],
 });
 
-// Predefined famous data (for demo purposes)
-const famousCities = {
-  'Paris': ['art', 'history', 'fashion'],
-  'London': ['history', 'culture', 'theater'],
-  'Tokyo': ['technology', 'innovation', 'culture'],
-  'New York': ['theater', 'art', 'business'],
-  // You can add more cities and their famous categories here
+// Predefined city-to-fame mapping
+const cityFame = {
+  'Paris': 'Known for the Eiffel Tower, Louvre Museum, and rich art history.',
+  'London': 'Famous for Buckingham Palace, Big Ben, and its royal heritage.',
+  'Tokyo': 'Renowned for its blend of traditional temples and modern technology.',
+  'New York': 'Iconic for Times Square, Central Park, and Broadway shows.',
+  'Rome': 'Historic landmarks like the Colosseum and Vatican City.',
+  'Las Vegas': 'The entertainment capital with vibrant nightlife and casinos.',
+  'Copenhagen': 'Celebrated for Tivoli Gardens and a high quality of life.',
+  'Edinburgh': 'Known for its festivals, historic castle, and Hogmanay celebrations.',
+  'Kolkata': 'Rich in culture with Durga Puja celebrations and colonial architecture.',
+  'Jaipur': 'Famous for its pink-hued buildings and historic forts.',
+  'Jodhpur': 'Known as the Blue City with its majestic Mehrangarh Fort.',
 };
 
+// Extract city name from Nominatim response
+const extractCityName = (data) => {
+  return (
+    data.address?.city ||
+    data.address?.town ||
+    data.address?.village ||
+    data.address?.state ||
+    'Unknown'
+  );
+};
+
+// Handles map clicks
 function MapInteractions({ setCoords, setLocationInfo }) {
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
-      setCoords([lat, lng]); // Set the coordinates when the marker is clicked
-      fetchLocationInfo(lat, lng, setLocationInfo); // Fetch location info after click
+      setCoords([lat, lng]);
+      fetchLocationInfo(lat, lng, setLocationInfo);
     },
   });
   return null;
@@ -33,73 +52,49 @@ function MapInteractions({ setCoords, setLocationInfo }) {
 // Fetch location info from OpenStreetMap (reverse geocoding)
 const fetchLocationInfo = async (lat, lng, setLocationInfo) => {
   try {
-    const res = await axios.get(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`
     );
+    const data = await res.json();
+    const city = extractCityName(data);
+    const fame = cityFame[city] || 'Information not available';
 
-    if (res.data && res.data.display_name) {
-      setLocationInfo({
-        name: res.data.display_name || 'Unknown location',
-        famousFor: 'Not available', // Default value, will be updated based on the passion check
-        lat: lat.toFixed(4),
-        lng: lng.toFixed(4),
-      });
-    } else {
-      setLocationInfo({
-        name: 'Location unavailable',
-        famousFor: 'Could not fetch information',
-        lat: 'N/A',
-        lng: 'N/A',
-      });
-    }
+    setLocationInfo({
+      name: data.display_name || 'Unknown location',
+      fame: fame,
+      lat: lat.toFixed(4),
+      lng: lng.toFixed(4),
+    });
   } catch (error) {
     console.error('Error fetching location info:', error);
     setLocationInfo({
       name: 'Location unavailable',
-      famousFor: 'Could not fetch information',
+      fame: 'Could not fetch information',
       lat: 'N/A',
       lng: 'N/A',
     });
   }
 };
 
-// Function to check if the city is famous for a specific passion
-const checkFamousForPassion = (cityName, passion) => {
-  const lowerPassion = passion.toLowerCase();
-  const cityFamousFor = famousCities[cityName] || [];
-
-  if (cityFamousFor.some((item) => item.toLowerCase() === lowerPassion)) {
-    return `Yes, ${cityName} is famous for ${passion}.`;
-  }
-  return `No, ${cityName} is not known for ${passion}.`;
-};
-
+// Main component
 export default function MyMapComponent() {
   const [coords, setCoords] = useState([51.505, -0.09]); // Default coordinates
   const [locationInfo, setLocationInfo] = useState({
     name: 'Loading location...',
-    famousFor: 'Loading famous information...',
+    fame: 'Loading fame information...',
     lat: 'N/A',
     lng: 'N/A',
   });
-  const [passionResult, setPassionResult] = useState('');
 
   const handleMarkerDrag = (e) => {
     const { lat, lng } = e.target.getLatLng();
-    setCoords([lat, lng]); // Update coordinates after dragging
-    fetchLocationInfo(lat, lng, setLocationInfo); // Fetch the new location info
-  };
-
-  const handlePassionSubmit = (event, passion) => {
-    if (event.key === 'Enter') {
-      const message = checkFamousForPassion(locationInfo.name, passion);
-      setPassionResult(message); // Update passion result
-    }
+    setCoords([lat, lng]);
+    fetchLocationInfo(lat, lng, setLocationInfo);
   };
 
   return (
     <div className="flex flex-col items-center space-y-2 p-2" style={{ height: '100vh' }}>
-      <h2 className="text-xl font-bold text-center text-black mb-3">🌍 Passion Map</h2>
+      <h2 className="text-xl font-bold text-center text-black mb-3">🌍 City Fame Map</h2>
       <p className="text-center text-black">Click or drag the marker to check city info!</p>
 
       <div style={{ height: '80%', width: '100%' }}>
@@ -112,26 +107,20 @@ export default function MyMapComponent() {
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <MapInteractions setCoords={setCoords} setLocationInfo={setLocationInfo} />
 
-          {/* Current draggable marker */}
           <Marker
             position={coords}
             icon={customIcon}
             draggable={true}
             eventHandlers={{
-              dragend: handleMarkerDrag, // Update coordinates and fetch new city info after drag
+              dragend: handleMarkerDrag,
             }}
           >
             <Popup>
-              📍 <strong>{locationInfo.name}</strong><br />
-              🌍 <strong>Coordinates:</strong> Lat: {locationInfo.lat}, Lng: {locationInfo.lng}<br />
-              🏙️ <strong>Famous for:</strong> {locationInfo.famousFor}<br />
-              <input
-                type="text"
-                placeholder="Enter a passion (e.g., art, engineering)"
-                onKeyDown={(e) => handlePassionSubmit(e, e.target.value)} // Trigger check on Enter key press
-                className="p-1 mt-2 text-black"
-              />
-              {passionResult && <p>{passionResult}</p>} {/* Display the result */}
+              <div className="text-black">
+                📍 <strong>{locationInfo.name}</strong><br />
+                🌍 <strong>Coordinates:</strong> Lat: {locationInfo.lat}, Lng: {locationInfo.lng}<br />
+                🏙️ <strong>Famous for:</strong> {locationInfo.fame}
+              </div>
             </Popup>
           </Marker>
         </MapContainer>
